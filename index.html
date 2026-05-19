@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GCC Market Cloud Terminal</title>
+  <style>
+    :root {
+      --bg: #050b0a;
+      --panel: #0a1715;
+      --panel-2: #0d201d;
+      --pane: #081614;
+      --line: #24413d;
+      --line-strong: #3d756e;
+      --text: #dffdf7;
+      --muted: #86aaa3;
+      --dim: #55746e;
+      --green: #59f29b;
+      --cyan: #48dcff;
+      --amber: #ffd166;
+      --red: #ff6464;
+      --blue: #7ab8ff;
+      --violet: #b795ff;
+      --font: "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      border-radius: 0 !important;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        linear-gradient(rgba(72, 220, 255, 0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(89, 242, 155, 0.022) 1px, transparent 1px),
+        radial-gradient(circle at 12% 0%, rgba(72, 220, 255, 0.12), transparent 32rem),
+        radial-gradient(circle at 82% 4%, rgba(255, 209, 102, 0.08), transparent 26rem),
+        var(--bg);
+      background-size: 18px 18px, 18px 18px, auto, auto, auto;
+      color: var(--text);
+      font-family: var(--font);
+      letter-spacing: 0;
+    }
+
+    body {
+      padding: 12px;
+    }
+
+    .shell {
+      width: min(1540px, 100%);
+      margin: 0 auto;
+      border: 1px solid var(--line-strong);
+      background: rgba(5, 11, 10, 0.96);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .topbar,
+    .ticker,
+    .footer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(14, 31, 29, 0.98), rgba(7, 17, 16, 0.98));
+    }
+
+    .topbar {
+      min-height: 48px;
+      padding: 0 14px;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f2fffb;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 18px rgba(72, 220, 255, 0.24);
+    }
+
+    .meta,
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .tag,
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      padding: 0 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .kbd {
+      min-height: 18px;
+      padding: 0 5px;
+      color: var(--text);
+      font-size: 10px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .ticker {
+      min-height: 34px;
+      padding: 0 14px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 22px;
+      min-width: max-content;
+      animation: drift 48s linear infinite;
+    }
+
+    @keyframes drift {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      min-height: calc(100vh - 130px);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(6, 16, 15, 0.92);
+      padding: 14px;
+    }
+
+    .side-section + .side-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .side-title {
+      margin: 0 0 10px;
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .side-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .side-list li,
+    .module-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .main {
+      min-width: 0;
+      overflow: hidden;
+      padding: 14px;
+    }
+
+    .command {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      min-height: 52px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: rgba(8, 22, 20, 0.88);
+    }
+
+    .prompt {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .prompt b {
+      color: var(--green);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    button {
+      height: 28px;
+      border: 1px solid var(--line);
+      padding: 0 10px;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--muted);
+      font: 11px var(--font);
+      cursor: pointer;
+    }
+
+    button:hover,
+    button.active {
+      border-color: var(--cyan);
+      background: rgba(72, 220, 255, 0.08);
+      color: var(--text);
+    }
+
+    .response-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .response-row {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(16, 35, 32, 0.92), rgba(8, 20, 18, 0.94)),
+        var(--panel);
+    }
+
+    .row-prompt {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 42px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(17, 40, 37, 0.62);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .row-prompt b {
+      color: var(--green);
+    }
+
+    .row-prompt > span:first-child,
+    .pane-head > span:first-child {
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .row-id {
+      color: var(--cyan);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .pane-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pane {
+      min-width: 0;
+      border-right: 1px solid var(--line);
+      background: var(--pane);
+    }
+
+    .pane + .pane {
+      border-right: 0;
+      background: rgba(9, 24, 22, 0.98);
+    }
+
+    .pane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      height: 34px;
+      padding: 0 10px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .pane-meta {
+      color: var(--dim);
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .terminal {
+      height: 310px;
+      margin: 0;
+      max-width: 100%;
+      padding: 10px;
+      overflow: auto;
+      color: var(--text);
+      font: 11px/1.48 var(--font);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      tab-size: 2;
+    }
+
+    .ok { color: var(--green); }
+    .warn { color: var(--amber); }
+    .err { color: var(--red); }
+    .cyan { color: var(--cyan); }
+    .blue { color: var(--blue); }
+    .violet { color: var(--violet); }
+    .muted { color: var(--muted); }
+    .dim { color: var(--dim); }
+
+    .footer {
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 14px;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .caret {
+      display: inline-block;
+      width: 8px;
+      height: 15px;
+      margin-left: 4px;
+      vertical-align: -2px;
+      background: var(--green);
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker-track,
+      .caret {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 6px;
+      }
+
+      .topbar,
+      .footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .meta,
+      .actions {
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+
+      .main {
+        padding: 8px;
+      }
+
+      .command,
+      .row-prompt {
+        grid-template-columns: 1fr;
+      }
+
+      .row-prompt {
+        display: block;
+      }
+
+      .row-prompt > span:first-child {
+        display: block;
+        max-width: 300px;
+        white-space: normal;
+      }
+
+      .row-id {
+        display: block;
+        margin-top: 8px;
+      }
+
+      .filters {
+        justify-content: flex-start;
+      }
+
+      .pane-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pane {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .pane + .pane {
+        border-bottom: 0;
+      }
+
+      .terminal {
+        height: 280px;
+        padding: 9px;
+        font-size: 8.7px;
+        line-height: 1.55;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">G</span><span>GCC.MKT // CLOUD TERMINAL</span></div>
+      <div class="meta">
+        <span class="tag ok"><span class="dot"></span>AI FEED ONLINE</span>
+        <span class="tag">LAYOUT: PROMPT ROW / 2 PANES</span>
+        <span class="tag">EDGES: SHARP</span>
+        <span class="tag" id="clock">UTC+04 00:00:00</span>
+      </div>
+      <div class="actions"><span>[F1] HELP</span><span>[F4] EXPORT</span><span>[F9] RUN</span></div>
+    </header>
+
+    <div class="ticker">
+      <div class="ticker-track">
+        <span>7010.SE STC 56.20 SAR <span class="ok">▲ +1.1%</span></span>
+        <span>2222.SE ARAMCO 30.40 SAR <span class="ok">▲ +0.4%</span></span>
+        <span>1180.SE SNB 37.85 SAR <span class="warn">▼ -0.2%</span></span>
+        <span>1120.SE ALRAJHI 98.40 SAR <span class="ok">▲ +0.6%</span></span>
+        <span>NBKK.KW NBK 0.91 KD <span class="ok">▲ +0.3%</span></span>
+        <span>QNBK.QA QNB 17.10 QAR <span class="ok">▲ +1.6%</span></span>
+        <span>EMAAR.AE EMAAR 9.84 AED <span class="ok">▲ +2.4%</span></span>
+        <span>7010.SE STC 56.20 SAR <span class="ok">▲ +1.1%</span></span>
+        <span>2222.SE ARAMCO 30.40 SAR <span class="ok">▲ +0.4%</span></span>
+        <span>1180.SE SNB 37.85 SAR <span class="warn">▼ -0.2%</span></span>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <aside class="sidebar">
+        <section class="side-section">
+          <h2 class="side-title">Row Contract</h2>
+          <ul class="side-list">
+            <li><span>one_prompt_per_row</span><span class="ok">[OK]</span></li>
+            <li><span>two_equal_panes</span><span class="ok">[OK]</span></li>
+            <li><span>left_metrics_data</span><span class="ok">[OK]</span></li>
+            <li><span>right_intel_nlp</span><span class="ok">[OK]</span></li>
+            <li><span>fixed_pane_height</span><span class="ok">[OK]</span></li>
+          </ul>
+        </section>
+
+        <section class="side-section">
+          <h2 class="side-title">Command Keys</h2>
+          <div class="side-list">
+            <div class="module-row"><span>filter company</span><span class="kbd">1</span></div>
+            <div class="module-row"><span>filter sector</span><span class="kbd">2</span></div>
+            <div class="module-row"><span>filter alerts</span><span class="kbd">3</span></div>
+            <div class="module-row"><span>filter earnings</span><span class="kbd">4</span></div>
+            <div class="module-row"><span>export row</span><span class="kbd">E</span></div>
+          </div>
+        </section>
+
+        <section class="side-section">
+          <h2 class="side-title">Signal Confidence</h2>
+          <pre class="terminal" style="height:auto;padding:0">Price feed        <span class="ok">███████░</span> 82% ▲
+Fundamentals      <span class="ok">██████░░</span> 74% →
+News NLP          <span class="ok">███████░</span> 81% ▲
+Event matching    <span class="warn">█████░░░</span> 66% →
+Disclosure parse  <span class="ok">██████░░</span> 77% ▲</pre>
+        </section>
+      </aside>
+
+      <main class="main">
+        <div class="command">
+          <div class="prompt"><b>mkt@gcc-cloud:~$</b> demo --layout prompt-row --columns 2 --pane-height fixed --signals dense --edges sharp<span class="caret"></span></div>
+          <nav class="filters" aria-label="terminal row filter">
+            <button class="active" data-filter="all">ALL</button>
+            <button data-filter="company">COMPANY</button>
+            <button data-filter="sector">SECTOR</button>
+            <button data-filter="alerts">ALERTS</button>
+            <button data-filter="watchlist">WATCHLIST</button>
+            <button data-filter="earnings">EARNINGS</button>
+            <button data-filter="whatif">WHAT-IF</button>
+          </nav>
+        </div>
+
+        <section class="response-stack" id="terminalGrid">
+          <article class="response-row" data-view="company watchlist">
+            <div class="row-prompt"><span><b>Prompt:</b> Show me the latest stock and financial snapshot for Saudi Telecom (STC) with recent news sentiment.</span><span class="row-id">ROW 01 / STC</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>METRICS + FUNDAMENTALS</span><span class="pane-meta">PRICE / RATIOS</span></div>
+<pre class="terminal">STC - Saudi Telecom Company - 1-year snapshot
+Status: <span class="ok">[OK]</span> Tadawul close | fundamentals TTM
+
+Price: 56.2 SAR  <span class="ok">▲ +17.0% 1Y</span>
+Mkt cap: 320B SAR | Free float: 29%
+Price path: 48 → 50 → 52 → 54 → 56  <span class="ok">[▂▃▄▆█]</span>
+52w range: 44.80 ├──────────────●──┤ 58.10
+
+Metric       | Value | Peer signal
+-------------|-------|----------------
+Revenue 1Y   | +9.2% | <span class="ok">▲ above median</span>
+Net profit 1Y|+12.1% | <span class="ok">▲ margin lift</span>
+P/E TTM      | 14.3x | → fair
+EV/EBITDA    |  7.1x | <span class="ok">▼ below peer med.</span>
+ROE          | 15.2% | <span class="ok">██████░░</span>
+
+Health score: <span class="ok">███████░░</span> 7.8/10
+Bias: <span class="ok">constructive</span> unless capex guide moves higher.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>NEWS + SENTIMENT + BOARD SIGNALS</span><span class="pane-meta">30D NLP</span></div>
+<pre class="terminal">News tone last 30d: <span class="ok">████░░</span> moderate positive
+Coverage: 22 articles | 70% neutral/positive | 30% regulatory-risk-focused
+
+Theme heat:
+5G rollout        <span class="ok">██████░</span> ▲
+IoT expansion     <span class="ok">█████░░</span> ▲
+Data-center capex <span class="warn">████░░░</span> →
+Spectrum risk     <span class="warn">███░░░░</span> ▼
+
+Earnings-call NLP:
+"enterprise cloud"       11 mentions <span class="ok">▲</span>
+"capex discipline"        8 mentions <span class="ok">▲</span>
+"regulatory review"       5 mentions <span class="warn">→</span>
+
+Board report extract:
+[OK] Dividend policy unchanged
+[WARN] Capex intensity elevated vs 3Y avg
+[OK] Data-center M&amp;A pipeline confirmed
+
+Alert rule: ping if weekly news &gt;10 OR sentiment &lt; -0.2.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="company alerts whatif">
+            <div class="row-prompt"><span><b>Prompt:</b> Give me a health-check on Aramco over the last 12 months: price performance, revenue, profit, and major news events.</span><span class="row-id">ROW 02 / ARAMCO</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>PRICE + FINANCIAL HEALTH</span><span class="pane-meta">12M VIEW</span></div>
+<pre class="terminal">ARAMCO - Saudi Aramco - 12-month health-check
+
+Price: 27.1 → 30.4 SAR  <span class="ok">▲ +12.2%</span>
+Path: 27.1 ▂▃▄▃▅▆█ 30.4
+Revenue 1Y:    <span class="ok">+8.5%</span>  [--&gt;]
+Net profit 1Y: <span class="ok">+24.1%</span> (oil-price-driven)
+
+Key ratios:
+P/E TTM:     11.2x  <span class="ok">▼ cheaper than market</span>
+EV/EBITDA:    3.8x  <span class="ok">███████░</span>
+ROE:         28.7%  <span class="ok">████████</span>
+Dividend yield est.: 6.4% <span class="ok">→ covered</span>
+
+Return attribution:
+Oil beta        <span class="ok">█████░░</span> ▲
+Dividend carry  <span class="ok">██████░</span> →
+Gas projects    <span class="ok">████░░░</span> ▲
+Geo-risk drag   <span class="warn">███░░░░</span> →</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>MAJOR EVENTS + KEYWORD RADAR</span><span class="pane-meta">NEWSFLOW</span></div>
+<pre class="terminal">News tone last 30d: <span class="ok">████░</span> moderate positive
+
+Major headlines:
+2026-01-10 <span class="ok">▲ +2.5%</span> Q4 beat + dividend reaffirmed
+2025-09-20 <span class="ok">▲ +3.3%</span> new gas-field licence awarded
+2025-06-15 <span class="err">▼ -1.8%</span> oil-tax rumor, 6 articles
+2025-03-10 <span class="ok">▲ +2.1%</span> Q1 beat, 8+ positive articles
+
+Keyword monitor:
+dividend      16 hits  <span class="ok">██████░</span> positive ▲
+environment    8 hits  <span class="warn">███░░░░</span> mixed →
+regulatory    12 hits  <span class="warn">████░░░</span> neutral ▼
+Strait risk   15 hits  <span class="warn">████░░░</span> watch →
+
+Overall event tone: <span class="ok">████░</span> 70% positive / 20% neutral / 10% negative
+Board note: capital spending language stayed "conservative".</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="company alerts">
+            <div class="row-prompt"><span><b>Prompt:</b> Compare Saudi Telecom and Zain GCC over the last year: stock performance, key ratios, and sentiment-weighted news.</span><span class="row-id">ROW 03 / TELECOM PEERS</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>COMPARATIVE METRICS</span><span class="pane-meta">STC VS ZAIN</span></div>
+<pre class="terminal">STC vs Zain GCC - 1-year comparison
+
+Ticker | Price 1Y | Revenue 1Y | Profit 1Y | P/E | EV/EBITDA
+-------|----------|------------|-----------|-----|----------
+STC    | <span class="ok">▲ +17.0%</span> |   +9.2%    |  +12.1%   |14.3 |   7.1
+Zain   | <span class="ok">▲ +11.5%</span> |  +14.0%    | +103.0%   | 8.9 |   5.6
+
+Price momentum:
+STC  48 → 51 → 53 → 56  <span class="ok">▂▄▆█</span>
+Zain .46 → .49 → .51 → .55 <span class="ok">▂▃▆█</span>
+
+Factor read:
+Growth:      STC <span class="ok">████░</span> | Zain <span class="ok">█████</span>
+Valuation:   STC <span class="warn">███░░</span> | Zain <span class="ok">████░</span>
+Quality:     STC <span class="ok">█████</span> | Zain <span class="warn">███░░</span>
+Leverage:    STC <span class="ok">low</span>   | Zain <span class="warn">watch</span>
+
+Screen result: Zain cheaper/growing faster; STC higher quality and cleaner risk.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>SENTIMENT + CALL THEMES</span><span class="pane-meta">30D WEIGHTED</span></div>
+<pre class="terminal">News sentiment:
+STC:  <span class="ok">████░░</span> moderate positive | 70% neutral/positive
+Zain: <span class="ok">█████░</span> strong positive    | 80% positive
+
+Sentiment-weighted catalysts:
+STC  5G/IoT/data centers      <span class="ok">▲ +0.42</span>
+STC  regulatory/spectrum      <span class="warn">▼ -0.13</span>
+Zain EBITDA margin expansion  <span class="ok">▲ +0.51</span>
+Zain Egypt M&amp;A rumor          <span class="warn">▼ -0.20</span>
+
+Earnings-call phrase map:
+STC:  cloud, capex, spectrum, enterprise
+Zain: margin, towers, Egypt, integration
+
+Board/risk tone:
+STC  [OK] dividend stable | [WARN] capex elevated
+Zain [OK] margin recovery | [WARN] M&amp;A approval risk
+
+Pair signal: <span class="ok">STC core / Zain tactical</span>.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="sector earnings">
+            <div class="row-prompt"><span><b>Prompt:</b> Show me how GCC banking stocks have performed vs earnings and news sentiment over the last 6 months.</span><span class="row-id">ROW 04 / GCC BANKS</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>SECTOR PERFORMANCE + EARNINGS</span><span class="pane-meta">6M DIAGNOSTIC</span></div>
+<pre class="terminal">GCC Banking Sector - 6-month snapshot
+
+Ticker | 6M Ret | ROE  | EPS Rev | NPL | Price trend
+-------|--------|------|---------|-----|-------------
+RYB    | <span class="ok">+14%</span>   | 15.2 |  +5.8%  |2.1 | <span class="ok">▂▃▄▆█</span> ▲
+NCB    |  <span class="ok">+9%</span>   | 13.8 |  +3.1%  |2.4 | <span class="ok">▂▄▅▅▆</span> →
+SAB    |  <span class="ok">+6%</span>   | 12.4 |  -1.2%  |3.0 | <span class="warn">▃▄▃▂▄</span> →
+QNB    |  <span class="ok">+7%</span>   | 14.9 |  +4.9%  |2.8 | <span class="ok">▂▃▅▅▆</span> ▲
+ENBD   | <span class="ok">+10%</span>   | 18.1 |  +8.1%  |4.6 | <span class="ok">▂▅▆▇█</span> ▲
+
+Sector score:
+Profitability <span class="ok">██████░░</span>
+Asset quality <span class="warn">████░░░░</span>
+Momentum      <span class="ok">█████░░░</span>
+
+Screen: high ROE + positive EPS revisions beats pure low P/E.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>NEWS + BOARD-RISK MATRIX</span><span class="pane-meta">NLP RISK</span></div>
+<pre class="terminal">Sentiment bars:
+RYB:  <span class="ok">████░░</span> strong positive   ▲ digital banking
+NCB:  <span class="ok">████░</span>  moderate positive →
+SAB:  <span class="warn">██░░░</span>  slightly negative ▼ real-estate scrutiny
+QNB:  <span class="ok">████░</span>  positive          ▲ deposit resilience
+ENBD: <span class="ok">█████</span>  strong positive   ▲ fee income
+
+Board-risk tone:
+Bank | CRE | Funding cost | NPL tone | Stress
+-----|-----|--------------|----------|--------
+RYB  | low | easing       | stable   | <span class="ok">██░░░</span>
+NCB  | med | easing       | stable   | <span class="ok">███░░</span>
+SAB  | med | sticky       | watch    | <span class="warn">████░</span>
+QNB  | low | steady       | stable   | <span class="ok">███░░</span>
+ENBD | med | easing       | watch    | <span class="warn">████░</span>
+
+Alert: flag if "real-estate exposure" + "provisioning" co-occur in 5+ headlines/week.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="sector">
+            <div class="row-prompt"><span><b>Prompt:</b> Compare UAE real-estate developers on the Dubai Financial Market: price returns, revenues, and headline risk over the last year.</span><span class="row-id">ROW 05 / DFM REAL ESTATE</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>DEVELOPER METRICS</span><span class="pane-meta">1Y DFM</span></div>
+<pre class="terminal">UAE Real Estate Developers - 1-year snapshot
+
+Ticker | 1Y Ret | Revenue 1Y | Margin | Leverage | Trend
+-------|--------|------------|--------|----------|--------
+Emaar  | <span class="ok">+12%</span>   |   +8%      | 28%    | low      | <span class="ok">▂▄▆▅█</span> ▲
+DAMAC  |  <span class="ok">+5%</span>   |  +14%      | 24%    | med      | <span class="warn">▂▃▄▃▅</span> →
+Aldar  | <span class="ok">+18%</span>   |  +10%      | 31%    | low      | <span class="ok">▂▃▅▇█</span> ▲
+UnionP |  <span class="warn">-3%</span>   |   +2%      | 13%    | high     | <span class="err">▅▄▃▂▂</span> ▼
+
+Quality composite:
+Aldar  <span class="ok">███████░</span> 8.1
+Emaar  <span class="ok">██████░░</span> 7.4
+DAMAC  <span class="warn">████░░░░</span> 5.8
+UnionP <span class="err">███░░░░░</span> 3.9
+
+Read: Aldar leads on return + margins; Emaar retains liquidity premium.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>HEADLINE RISK + PROJECT NOTES</span><span class="pane-meta">NEWS TONE</span></div>
+<pre class="terminal">Headline-risk key:
+█████ = low risk | ████░ = moderate | ██░░░ = concern
+
+Ticker | Headline risk | Top negative phrase | Direction
+-------|---------------|---------------------|----------
+Emaar  | <span class="warn">████░</span> moderate | tourism rules       | →
+DAMAC  | <span class="ok">███░░</span> low      | delivery delays     | ▼
+Aldar  | <span class="ok">█████</span> low risk | none material       | ▲
+UnionP | <span class="err">██░░░</span> concern  | debt rollovers      | ▼
+
+News NLP:
+Emaar: 20% mention regulatory changes on tourism-linked projects.
+DAMAC: 15% flag delivery delays on select off-plan projects.
+Aldar: government-backed pipeline language supports sentiment.
+
+Board/report tone:
+[OK] Aldar backlog visibility improving
+[WARN] DAMAC delivery-timing questions rising
+[ERR] UnionP balance-sheet language remains fragile</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="sector watchlist">
+            <div class="row-prompt"><span><b>Prompt:</b> Rank the top 5 energy stocks in Saudi Arabia by 1-year return, P/E, and news sentiment.</span><span class="row-id">ROW 06 / SAUDI ENERGY</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>RANKING + VALUATION</span><span class="pane-meta">ENERGY FACTORS</span></div>
+<pre class="terminal">Top 5 Saudi Energy Stocks - 1-year ranking
+
+Rank | Ticker | 1Y Ret | P/E | EV/EBITDA | Composite
+-----|--------|--------|-----|-----------|-----------
+  1  | 2222   | <span class="ok">+24%</span>   |11.2 |   3.8     | <span class="ok">████████</span>
+  2  | ARB    | <span class="ok">+18%</span>   |12.5 |   5.1     | <span class="ok">██████░░</span>
+  3  | SABIC  | <span class="ok">+14%</span>   |11.8 |   5.4     | <span class="ok">██████░░</span>
+  4  | ADP    | <span class="ok">+11%</span>   |13.1 |   6.0     | <span class="ok">█████░░░</span>
+  5  | PCC    |  <span class="ok">+9%</span>   |10.9 |   4.9     | <span class="ok">█████░░░</span>
+
+Sparkline:
+2222  <span class="ok">▂▃▅▆█</span> ▲ | ARB <span class="ok">▂▄▅▅▇</span> ▲ | SABIC <span class="ok">▃▃▄▆▆</span> →
+
+Factor winner:
+Return: 2222 | Valuation: PCC | Quality: 2222 | Revision: ARB</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>NEWS SENTIMENT + CATALYSTS</span><span class="pane-meta">30D NLP</span></div>
+<pre class="terminal">News sentiment:
+2222   <span class="ok">█████</span>  very positive ▲ earnings beat + gas fields
+ARB    <span class="ok">████░</span>  positive      ▲ dividend-safety focus
+SABIC  <span class="ok">████░</span>  positive      → JV offset by carbon-tax chatter
+ADP    <span class="ok">████░</span>  positive      ▲ infrastructure wins
+PCC    <span class="ok">████░</span>  positive      → valuation support
+
+Risk phrases:
+"carbon-tax risk"       SABIC 8 hits  <span class="warn">███░░</span>
+"feedstock pricing"     ARB   6 hits  <span class="warn">██░░░</span>
+"dividend coverage"     2222 14 hits  <span class="ok">█████</span>
+"project awards"        ADP  10 hits  <span class="ok">████░</span>
+
+Board/call read:
+[OK] Aramco dividend signal anchored
+[WARN] SABIC carbon language still visible
+[OK] ADP order-book tone improving</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="alerts company">
+            <div class="row-prompt"><span><b>Prompt:</b> Track Aramco stock for any news that mentions "regulatory", "environment", or "dividend" and show me a sentiment trend over time.</span><span class="row-id">ROW 07 / ARAMCO NEWS TRACKER</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>KEYWORD STATS + PRICE LINK</span><span class="pane-meta">90D TRACKER</span></div>
+<pre class="terminal">ARAMCO - News keyword monitor
+Window: last 90 days | Price ref: 30.4 SAR
+
+Keyword      | Hits | Avg move | Relevance | Direction
+-------------|------|----------|-----------|----------
+regulatory   |  12  |  <span class="warn">-0.4%</span>   | <span class="warn">████░░</span>    | ▼
+environment  |   8  |  <span class="warn">-0.1%</span>   | <span class="warn">███░░░</span>    | →
+dividend     |  16  |  <span class="ok">+0.8%</span>   | <span class="ok">██████</span>    | ▲
+
+30d sentiment trend:
+Day 01-10 <span class="ok">█████░</span> strong positive  ▲ dividend confirmation
+Day 11-20 <span class="ok">████░░</span> positive         → environment debate
+Day 21-30 <span class="ok">████░░</span> positive         ▲ green-energy JV
+
+Correlation: dividend headlines explain most positive price gaps.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>ALERT FEED + NLP SUMMARY</span><span class="pane-meta">EVENT INTEL</span></div>
+<pre class="terminal">Overall tone: <span class="ok">████░</span> positive
+Mix: 80% positive | 10% neutral | 10% negative
+
+Alert tape:
+[OK]   2026-01-10 dividend reaffirmed; 12+ headlines
+[WARN] 2025-12-18 environment-risk debate; no penalty
+[OK]   2025-11-26 green-energy JV announced
+[WARN] 2025-10-09 regulatory tax phrase reappeared
+
+Phrase velocity:
+"dividend"     <span class="ok">▂▃▆█▇</span> ▲ +38% w/w
+"environment"  <span class="warn">▂▃▄▅▄</span> → +9% w/w
+"regulatory"   <span class="warn">▃▃▄▂▃</span> ▼ -4% w/w
+
+Generated note:
+Dividend language remains the anchor. Regulatory/environment stories are present, but not yet strong enough to offset cash-yield sentiment.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="alerts earnings company">
+            <div class="row-prompt"><span><b>Prompt:</b> Ahead of STC's next earnings, show prior 4 quarters: revenue, profit, guidance, and how the stock reacted after each report.</span><span class="row-id">ROW 08 / STC EARNINGS</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>QUARTERLY FUNDAMENTALS</span><span class="pane-meta">LAST 4Q</span></div>
+<pre class="terminal">STC - Earnings season preview
+
+Quarter | Revenue B SAR | Profit B SAR | Reaction | Trend
+--------|---------------|--------------|----------|--------
+Q1 2025 |     19.21     |    3.649     | <span class="ok">▲ +4.2%</span> | <span class="ok">▂▅█</span>
+Q2 2025 |     19.45     |    3.800     | <span class="ok">▲ +3.8%</span> | <span class="ok">▃▆█</span>
+Q3 2025 |     19.60     |    3.920     | <span class="ok">▲ +2.1%</span> | <span class="ok">▄▆█</span>
+Q4 2025 |     19.85     |    4.050     | <span class="err">▼ -1.8%</span> | <span class="warn">▆█▅</span>
+
+Guidance tracker:
+Revenue growth       <span class="ok">██████░</span> ▲
+EBITDA margin        <span class="ok">█████░░</span> →
+Capex intensity      <span class="warn">██████░</span> ▲ risk
+Dividend visibility  <span class="ok">███████</span> →
+
+Setup: 3 of 4 quarters beat or broadly met expectations.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>CALL TRANSCRIPT + BOARD REPORT</span><span class="pane-meta">REACTION DRIVERS</span></div>
+<pre class="terminal">Stock reaction explainers:
+Q1 +4.2%  "better-than-expected 5G subscriber growth" 10+ headlines
+Q2 +3.8%  "capex guided lower than feared"             8 articles
+Q3 +2.1%  "no major regulatory surprise"               6 articles
+Q4 -1.8%  "capex guidance higher than expected"        9 articles
+
+Transcript heat:
+5G growth           <span class="ok">██████░</span> ▲
+enterprise cloud    <span class="ok">█████░░</span> ▲
+capex guidance      <span class="warn">██████░</span> ▲
+regulatory risk     <span class="warn">███░░░░</span> →
+
+Board notes:
+[OK] dividend language unchanged
+[OK] subscriber metrics strong
+[WARN] data-center spend may pressure FCF
+[WARN] regulatory-risk language still recurring
+
+Next-print watch: capex-to-sales &gt;18% would likely trigger downside.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="watchlist">
+            <div class="row-prompt"><span><b>Prompt:</b> Show me a terminal-style dashboard for my shortlist: STC, Aramco, NBK, with 1-year price, key ratios, and news sentiment.</span><span class="row-id">ROW 09 / WATCHLIST</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>WATCHLIST METRICS</span><span class="pane-meta">1Y VIEW</span></div>
+<pre class="terminal">Watchlist Dashboard - STC, Aramco, NBK
+
+Ticker | Price 1Y | P/E | ROE  | Health | Trend
+-------|----------|-----|------|--------|--------
+STC    | <span class="ok">+17%</span>     |14.3 |15.2% | 7/10   | <span class="ok">▂▄▆█</span> ▲
+2222   | <span class="ok">+24%</span>     |11.2 |28.7% | 9/10   | <span class="ok">▂▃▆█</span> ▲
+NBK    | <span class="ok">+10%</span>     |12.8 |14.5% | 6/10   | <span class="ok">▂▃▄▆</span> →
+
+One-line scores:
+STC:  <span class="ok">████░░</span> 7/10 - strong
+2222: <span class="ok">█████░</span> 9/10 - very strong
+NBK:  <span class="blue">████░░</span> 6/10 - okay, moderate news risk
+
+Portfolio skew:
+Energy yield <span class="ok">█████░</span> | Telecom growth <span class="ok">████░░</span> | Bank stability <span class="blue">███░░░</span></pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>WATCHLIST INTEL</span><span class="pane-meta">NEWS + EVENTS</span></div>
+<pre class="terminal">News sentiment:
+STC  <span class="ok">████░░</span> moderate positive | 5G + IoT narrative
+2222 <span class="ok">█████░</span> positive          | earnings + dividend anchor
+NBK  <span class="ok">████░░</span> positive          | capital adequacy mentioned
+
+Risk watch:
+STC  regulatory/capex       <span class="warn">███░░</span> →
+2222 geo/tax/environment    <span class="warn">████░</span> →
+NBK  capital adequacy       <span class="warn">███░░</span> ▲
+
+Event calendar:
+STC earnings window      [T-12d] <span class="warn">WATCH</span>
+Aramco dividend update   [T-20d] <span class="ok">OK</span>
+NBK capital note         [T-31d] <span class="blue">INFO</span>
+
+Generated note:
+2222 carries the cleanest aligned signal. STC has the best growth narrative; NBK is stable but headline beta is lower.</pre>
+              </section>
+            </div>
+          </article>
+
+          <article class="response-row" data-view="whatif sector">
+            <div class="row-prompt"><span><b>Prompt:</b> Show me which GCC bank stocks are most sensitive to interest-rate-hike news by comparing price moves with major rate-announcement headlines.</span><span class="row-id">ROW 10 / RATE SENSITIVITY</span></div>
+            <div class="pane-grid">
+              <section class="pane">
+                <div class="pane-head"><span>PRICE SHOCK RANKING</span><span class="pane-meta">12M RATE EVENTS</span></div>
+<pre class="terminal">GCC Bank - Rate-sensitivity ranking
+
+Ticker | Avg move after hike news | Headline volume | Shock bar
+-------|--------------------------|-----------------|----------
+SAB    |          <span class="err">-2.8%</span>           |       12        | <span class="err">█████</span> high
+QNB    |          <span class="warn">-1.9%</span>           |       10        | <span class="warn">████░</span> moderate
+NCB    |          <span class="warn">-1.2%</span>           |        8        | <span class="ok">███░░</span> low
+ADCB   |          <span class="warn">-1.6%</span>           |        9        | <span class="warn">███░░</span> moderate
+
+Event tape:
+Fed hold      → GCC bank basket <span class="ok">▲ +0.9%</span>
+Fed hike      → GCC bank basket <span class="err">▼ -1.7%</span>
+Oil rally     → GCC bank basket <span class="ok">▲ +0.6%</span>
+
+Model read: SAB has highest headline beta; NCB most insulated by liquidity narrative.</pre>
+              </section>
+              <section class="pane">
+                <div class="pane-head"><span>HEADLINE LANGUAGE + BOARD TONE</span><span class="pane-meta">RISK NLP</span></div>
+<pre class="terminal">Phrase co-occurrence after rate headlines:
+"loan-loss provision"  SAB  9 hits  <span class="err">█████</span>
+"deposit margin"      QNB  6 hits  <span class="warn">████░</span>
+"strong capital"      NCB  7 hits  <span class="ok">████░</span>
+"credit risk"         ADCB 5 hits  <span class="warn">███░░</span>
+
+Board-risk tone:
+SAB  [WARN] credit-risk language spikes post-hike
+QNB  [INFO] NIM support partly offsets deposit beta
+NCB  [OK] high liquidity + retail deposit base
+ADCB [WARN] loan growth sensitive to rates
+
+Sentiment response:
+Day 0     <span class="err">██░░░</span> negative
+Day 1-3   <span class="warn">███░░</span> stabilizing
+Day 4-10  <span class="blue">████░</span> neutral
+
+Alert: downgrade if rate-hike headline volume &gt;15 and NPL phrase count &gt;8.</pre>
+              </section>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <span>DEMO DATA ONLY // realistic/synthetic GCC terminal responses for product presentation</span>
+      <span>Render: static HTML/CSS/JS · two equal panes per prompt row · sharp edges</span>
+    </footer>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll("[data-filter]");
+    const panels = document.querySelectorAll("[data-view]");
+    const clock = document.getElementById("clock");
+
+    function updateClock() {
+      const now = new Date();
+      const time = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Dubai",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).format(now);
+      clock.textContent = `UTC+04 ${time}`;
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+        buttons.forEach((item) => item.classList.toggle("active", item === button));
+        panels.forEach((panel) => {
+          const views = panel.dataset.view.split(" ");
+          const visible = filter === "all" || views.includes(filter);
+          panel.style.display = visible ? "" : "none";
+        });
+      });
+    });
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
