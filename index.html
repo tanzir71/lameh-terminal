@@ -4,14 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GCC Market Cloud Terminal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
   <style>
     :root {
-      --bg: #050b0a;
-      --panel: #0a1715;
-      --panel-2: #0d201d;
-      --pane: #081614;
-      --line: #24413d;
-      --line-strong: #3d756e;
+      --bg: #050908;
+      --panel: #07110f;
+      --panel-2: #091614;
+      --pane: #06100e;
+      --line: #172a27;
+      --line-strong: #1d3834;
       --text: #dffdf7;
       --muted: #86aaa3;
       --dim: #55746e;
@@ -34,13 +35,7 @@
       min-height: 100%;
       margin: 0;
       overflow-x: hidden;
-      background:
-        linear-gradient(rgba(72, 220, 255, 0.028) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(89, 242, 155, 0.022) 1px, transparent 1px),
-        radial-gradient(circle at 12% 0%, rgba(72, 220, 255, 0.12), transparent 32rem),
-        radial-gradient(circle at 82% 4%, rgba(255, 209, 102, 0.08), transparent 26rem),
-        var(--bg);
-      background-size: 18px 18px, 18px 18px, auto, auto, auto;
+      background: var(--bg);
       color: var(--text);
       font-family: var(--font);
       letter-spacing: 0;
@@ -53,9 +48,8 @@
     .shell {
       width: min(1540px, 100%);
       margin: 0 auto;
-      border: 1px solid var(--line-strong);
-      background: rgba(5, 11, 10, 0.96);
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      background: #050b0a;
     }
 
     .topbar,
@@ -66,7 +60,7 @@
       gap: 12px;
       min-width: 0;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(14, 31, 29, 0.98), rgba(7, 17, 16, 0.98));
+      background: #07110f;
     }
 
     .topbar {
@@ -90,9 +84,8 @@
       place-items: center;
       width: 26px;
       height: 26px;
-      border: 1px solid var(--cyan);
+      border: 1px solid var(--line-strong);
       color: var(--cyan);
-      box-shadow: 0 0 18px rgba(72, 220, 255, 0.24);
     }
 
     .meta,
@@ -114,7 +107,7 @@
       min-height: 24px;
       padding: 0 8px;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.025);
+      background: #07110f;
       color: var(--muted);
       font-size: 11px;
     }
@@ -130,7 +123,6 @@
       width: 7px;
       height: 7px;
       background: currentColor;
-      box-shadow: 0 0 12px currentColor;
     }
 
     .ticker {
@@ -162,7 +154,7 @@
 
     .sidebar {
       border-right: 1px solid var(--line);
-      background: rgba(6, 16, 15, 0.92);
+      background: #060f0e;
       padding: 14px;
     }
 
@@ -213,7 +205,7 @@
       margin-bottom: 12px;
       padding: 10px 12px;
       border: 1px solid var(--line);
-      background: rgba(8, 22, 20, 0.88);
+      background: #071210;
     }
 
     .prompt {
@@ -240,7 +232,7 @@
       height: 28px;
       border: 1px solid var(--line);
       padding: 0 10px;
-      background: rgba(255, 255, 255, 0.02);
+      background: #07110f;
       color: var(--muted);
       font: 11px var(--font);
       cursor: pointer;
@@ -249,7 +241,7 @@
     button:hover,
     button.active {
       border-color: var(--cyan);
-      background: rgba(72, 220, 255, 0.08);
+      background: #0a1917;
       color: var(--text);
     }
 
@@ -262,9 +254,7 @@
       min-width: 0;
       overflow: hidden;
       border: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(16, 35, 32, 0.92), rgba(8, 20, 18, 0.94)),
-        var(--panel);
+      background: var(--panel);
     }
 
     .row-prompt {
@@ -275,7 +265,7 @@
       min-height: 42px;
       padding: 8px 10px;
       border-bottom: 1px solid var(--line);
-      background: rgba(17, 40, 37, 0.62);
+      background: #0a1917;
       color: var(--muted);
       font-size: 11px;
       line-height: 1.4;
@@ -311,7 +301,7 @@
 
     .pane + .pane {
       border-right: 0;
-      background: rgba(9, 24, 22, 0.98);
+      background: #071412;
     }
 
     .pane-head {
@@ -346,6 +336,21 @@
       overflow-wrap: anywhere;
       word-break: break-word;
       tab-size: 2;
+      scrollbar-color: var(--line-strong) var(--pane);
+    }
+
+    .terminal::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    .terminal::-webkit-scrollbar-track {
+      background: var(--pane);
+    }
+
+    .terminal::-webkit-scrollbar-thumb {
+      background: var(--line-strong);
+      border: 2px solid var(--pane);
     }
 
     .ok { color: var(--green); }
